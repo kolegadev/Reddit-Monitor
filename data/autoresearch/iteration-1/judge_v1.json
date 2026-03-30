@@ -1,0 +1,99 @@
+{
+  "iteration": 1,
+  "candidate_a": "baseline",
+  "candidate_b": "candidate_v1",
+  "changelog_b": "Removed redundant 'AI Answer' section (was duplicating intro content). Moved research numbers to top for stronger hook. Consolidated 8 risk categories into 5 distinct patterns. Removed filler paragraphs. Tightened CTA to single sentence. Cut ~500 words.",
+  "dimension_results": [
+    {
+      "dimension": "Audience Fit (0.18)",
+      "winner": "B",
+      "score_a": 3,
+      "score_b": 4,
+      "confidence": 0.85,
+      "reason": "B directly addresses senior devs with 'Senior developers are shipping vibe-coded applications into production right now.' Removes generic 'This question came up across multiple subreddits' preamble that didn't serve the audience. Each pattern section has a concrete 'What to do' specific to engineering leads.",
+      "evidence_a": ["\"This question came up across multiple subreddits\" — generic preamble, doesn't target senior devs"],
+      "evidence_b": ["\"Senior developers are shipping vibe-coded applications into production right now.\" — direct audience callout", "\"This isn't laziness — it's a workflow problem. When you're shipping features 5x faster, your security process needs to match.\" — speaks to their actual situation"]
+    },
+    {
+      "dimension": "Clarity (0.14)",
+      "winner": "B",
+      "score_a": 3,
+      "score_b": 4,
+      "confidence": 0.80,
+      "reason": "B is more readable — tighter paragraphs, clearer structure. A has the confusing 'AI Answer' section that re-states the intro paragraph almost verbatim, making readers wonder if they missed something.",
+      "evidence_a": ["Supply chain paragraph appears identically in intro AND as section 1 — confusing repetition"],
+      "evidence_b": ["\"The Numbers\" section upfront gives clarity on scope before diving into patterns", "Clean 5-pattern structure vs scattered 8+3 section approach"]
+    },
+    {
+      "dimension": "Structure/Flow (0.12)",
+      "winner": "B",
+      "score_a": 2,
+      "score_b": 4,
+      "confidence": 0.90,
+      "reason": "A has severe structural issues: intro repeats in 'AI Answer' section, 'What the Research Shows' is buried mid-article, 'The Patterns' section duplicates several points from the AI Answer section. B flows: hook → numbers → patterns → CTA.",
+      "evidence_a": ["Supply chain discussed in intro, then again as AI Answer #1, then again in Patterns — three times", "No clear hierarchy: are the AI Answer items or the Patterns the main content?"],
+      "evidence_b": ["Linear progression: data upfront, then each pattern with evidence + fix", "No duplication across sections"]
+    },
+    {
+      "dimension": "Novelty/Insight (0.12)",
+      "winner": "B",
+      "score_a": 3,
+      "score_b": 4,
+      "confidence": 0.70,
+      "reason": "Both use the same research data. B adds the insight about workflow: 'This isn't laziness — it's a workflow problem. When you're shipping features 5x faster, your security process needs to match.' and 'The AI doesn't tell you which library pattern it copied from version 2.3.1.'",
+      "evidence_a": ["Mostly lists categories without fresh framing"],
+      "evidence_b": ["\"The AI doesn't tell you which library pattern it copied from version 2.3.1 of something that was compromised in version 2.0.0.\" — concrete, novel framing of supply chain risk"]
+    },
+    {
+      "dimension": "Factual Caution (0.10)",
+      "winner": "Tie",
+      "score_a": 4,
+      "score_b": 4,
+      "confidence": 0.80,
+      "reason": "Both cite the same research sources with appropriate attribution. No unsupported claims in either. Both hedge appropriately.",
+      "evidence_a": ["\"Bigger models aren't safer. More tokens don't fix bad patterns.\" — strong claim but backed by cited studies"],
+      "evidence_b": ["Same claim preserved: \"Bigger models aren't safer. More tokens don't fix bad patterns.\""]
+    },
+    {
+      "dimension": "Persuasiveness (0.10)",
+      "winner": "B",
+      "score_a": 3,
+      "score_b": 4,
+      "confidence": 0.75,
+      "reason": "B leads with hard numbers which builds credibility. A buries the research after a long list of generic categories. B's structure (problem → evidence → fix) per pattern is more persuasive than A's (list → list → research → list with fixes).",
+      "evidence_a": ["Reader must wade through 8 generic categories before reaching any data"],
+      "evidence_b": ["Numbers section hits first, establishing stakes before explaining patterns"]
+    },
+    {
+      "dimension": "CTA Strength (0.12)",
+      "winner": "B",
+      "score_a": 3,
+      "score_b": 4,
+      "confidence": 0.75,
+      "reason": "B integrates CTAs into each pattern section (Kolega.dev mentioned as 'What to do' fix), making them feel like natural next steps rather than a tacked-on pitch. Both have the same final CTA. A has CTAs scattered across pattern sections too but they feel more promotional.",
+      "evidence_a": ["\"Kolega.dev detects leaked API keys\" — fine but standalone"],
+      "evidence_b": ["Each 'What to do' section naturally leads to tooling, making the CTA feel like advice not a pitch", "Final CTA: \"Deep code scanning that catches what SAST misses, with automated fix generation that understands your codebase.\" — specific value prop"]
+    },
+    {
+      "dimension": "Brand-Tone Consistency (0.12)",
+      "winner": "B",
+      "score_a": 3,
+      "score_b": 4,
+      "confidence": 0.70,
+      "reason": "Both maintain direct tone. B is more consistently direct — removes the soft \"This question came up across multiple subreddits\" intro. A has some tone inconsistency between the dry AI Answer list and the more opinionated Patterns section.",
+      "evidence_a": ["Shifts from dry list format in 'AI Answer' to more opinionated 'The Patterns' section"],
+      "evidence_b": ["Consistent direct voice throughout: \"The speed of generation outpaces the speed of validation.\""]
+    }
+  ],
+  "overall_winner": "B",
+  "weighted_score_a": 30.6,
+  "weighted_score_b": 40.0,
+  "key_improvements_for_next_iteration": [
+    "Add a more specific opening anecdote or scenario to strengthen audience hook further",
+    "The 'What to do' CTAs feel slightly repetitive in structure — vary the fix format across sections",
+    "Could add one more concrete real-world example of a breach caused by vibe coding",
+    "Consider adding a brief section addressing the likely objection: 'but we already have SAST/Dependabot'",
+    "The transition from numbers to patterns could be smoother — current break is abrupt"
+  ],
+  "judge_flags": []
+}

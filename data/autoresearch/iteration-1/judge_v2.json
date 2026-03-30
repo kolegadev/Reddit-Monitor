@@ -1,0 +1,99 @@
+{
+  "iteration": 2,
+  "candidate_a": "candidate_v1 (current best)",
+  "candidate_b": "candidate_v2",
+  "changelog_b": "Added concrete opening scenario (Supabase service_role key leak). Addressed 'we already have SAST' objection in injection and supply chain sections. Varied CTA structure — some inline, some standalone. Added QA team insight in auth section. Removed 'What to do' headers for more natural flow.",
+  "dimension_results": [
+    {
+      "dimension": "Audience Fit (0.18)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 5,
+      "confidence": 0.85,
+      "reason": "B opens with a specific scenario that senior devs will immediately recognize (junior shipping Supabase app with leaked key). This is their daily reality. The pre-emptive 'We already have Dependabot' objection is spot-on for this audience.",
+      "evidence_a": ["\"Senior developers are shipping vibe-coded applications into production right now.\" — direct but generic"],
+      "evidence_b": ["\"A junior developer on your team just shipped a Next.js app with a Supabase backend.\" — instantly specific to engineering leads managing teams", "\"'We already have Dependabot' isn't enough\" — addresses the #1 objection this audience will have"]
+    },
+    {
+      "dimension": "Clarity (0.14)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 4,
+      "confidence": 0.55,
+      "reason": "Both are clear. B's opening scenario is engaging but slightly longer. The removal of 'What to do' headers in B makes the fix suggestions feel more integrated but slightly less scannable.",
+      "evidence_a": ["\"What to do:\" headers make fixes easy to scan"],
+      "evidence_b": ["Opening scenario is vivid and immediately communicates the stakes"]
+    },
+    {
+      "dimension": "Structure/Flow (0.12)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 4,
+      "confidence": 0.60,
+      "reason": "B's structure is equivalent to A. The opening anecdote is a stronger hook than A's declarative statement. Both flow well.",
+      "evidence_a": ["Clean linear flow"],
+      "evidence_b": ["Anecdote → data → patterns → CTA is a stronger narrative arc"]
+    },
+    {
+      "dimension": "Novelty/Insight (0.12)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 5,
+      "confidence": 0.80,
+      "reason": "B adds two genuinely novel insights: the QA team blind spot ('Your QA team tests the UI, the login works, they mark it done') and the Dependabot limitation. These are specific, non-obvious points that this audience hasn't read a hundred times.",
+      "evidence_a": ["\"This isn't laziness — it's a workflow problem.\" — good insight"],
+      "evidence_b": ["\"Your QA team tests the UI, the login works, they mark it done. Nobody checks whether the API endpoint requires authentication.\" — perfectly captures a real blind spot", "\"'We already have Dependabot' isn't enough when the AI is introducing dependencies you don't even know about.\" — pre-empts a specific objection"]
+    },
+    {
+      "dimension": "Factual Caution (0.10)",
+      "winner": "Tie",
+      "score_a": 4,
+      "score_b": 4,
+      "confidence": 0.80,
+      "reason": "Both cite the same sources. No new unsupported claims in B. The opening scenario is presented as hypothetical but realistic.",
+      "evidence_a": ["All claims sourced"],
+      "evidence_b": ["Same sources, opening scenario hedged appropriately: 'This isn't hypothetical. It's the #1 pattern we see.' — claim is about kolega.dev's observation, not a stat"]
+    },
+    {
+      "dimension": "Persuasiveness (0.10)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 5,
+      "confidence": 0.75,
+      "reason": "B's opening scenario creates emotional engagement before the data. The pre-emptive objection handling makes the argument harder to dismiss. 'This is the fastest path to a breach. Not sophisticated attacks, not zero-days — just copied credentials.' is a strong, persuasive framing.",
+      "evidence_a": ["Data-first approach is logical but less emotionally engaging"],
+      "evidence_b": ["\"Not sophisticated attacks, not zero-days — just copied credentials.\" — reframes the threat in accessible, urgent terms"]
+    },
+    {
+      "dimension": "CTA Strength (0.12)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 4,
+      "confidence": 0.60,
+      "reason": "Both have integrated CTAs per section. B's objection-handling makes the tool recommendations feel more like answers to real problems. Slight edge to B.",
+      "evidence_a": ["CTAs are clean and relevant"],
+      "evidence_b": ["\"Your existing SAST tool might catch some of these. But... Kolega.dev's semantic analysis catches what pattern matching misses.\" — CTA that addresses a specific concern"]
+    },
+    {
+      "dimension": "Brand-Tone Consistency (0.12)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 5,
+      "confidence": 0.75,
+      "reason": "B's opening anecdote is more in line with the kolega.dev voice — specific, slightly provocative, no-nonsense. The 'This is the fastest path to a breach' line is exactly the kind of direct claim the brand would make.",
+      "evidence_a": ["Consistent but slightly more generic in its directness"],
+      "evidence_b": ["\"This is the fastest path to a breach. Not sophisticated attacks, not zero-days — just copied credentials.\" — punchy, confident, data-adjacent"]
+    }
+  ],
+  "overall_winner": "B",
+  "weighted_score_a": 40.0,
+  "weighted_score_b": 45.6,
+  "key_improvements_for_next_iteration": [
+    "The opening scenario is strong but claims 'This isn't hypothetical' — consider adding one real-world example or case study link for credibility",
+    "Pattern sections could benefit from sub-headings that include the specific attack type (e.g., 'Hardcoded Secrets → Database Exposure')",
+    "The final CTA paragraph is nearly identical to v1 — could be tighter",
+    "Consider a brief 'What we checked' or methodology note for the Escape.tech / Invicti numbers to increase trust",
+    "The 'blindfolded driving' metaphor is overused in security writing — consider a fresher analogy"
+  ],
+  "judge_flags": []
+}

@@ -1,0 +1,99 @@
+{
+  "iteration": 4,
+  "candidate_a": "candidate_v3 (current best)",
+  "candidate_b": "candidate_v4",
+  "changelog_b": "Added consequence to opening ('Within a week, someone found the key. Your production database is exposed.'). Replaced 3rd 'semantic analysis' with 'regex-based tools'. Minor word tightening throughout. Removed 'scanned real apps in production' parenthetical from Escape.tech (was slightly verbose).",
+  "dimension_results": [
+    {
+      "dimension": "Audience Fit (0.18)",
+      "winner": "B",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.55,
+      "reason": "Both are tightly matched. B's consequence line in the opening raises stakes slightly but both are already at ceiling for this audience.",
+      "evidence_a": ["Strong audience targeting throughout"],
+      "evidence_b": ["\"Within a week, someone found the key. Your production database is exposed.\" — adds realistic consequence"]
+    },
+    {
+      "dimension": "Clarity (0.14)",
+      "winner": "Tie",
+      "score_a": 4,
+      "score_b": 4,
+      "confidence": 0.60,
+      "reason": "No meaningful clarity difference. Both are well-written.",
+      "evidence_a": ["Clear throughout"],
+      "evidence_b": ["Equally clear"]
+    },
+    {
+      "dimension": "Structure/Flow (0.12)",
+      "winner": "Tie",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.60,
+      "reason": "Structure unchanged from v3 which was already strong.",
+      "evidence_a": ["Strong narrative arc"],
+      "evidence_b": ["Same arc, slightly tighter"]
+    },
+    {
+      "dimension": "Novelty/Insight (0.12)",
+      "winner": "Tie",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.55,
+      "reason": "No new insights added. Both contain the same novel framings.",
+      "evidence_a": ["AI mistakes vs human mistakes framing"],
+      "evidence_b": ["Same insights preserved"]
+    },
+    {
+      "dimension": "Factual Caution (0.10)",
+      "winner": "A",
+      "score_a": 4,
+      "score_b": 4,
+      "confidence": 0.55,
+      "reason": "B removed the parenthetical methodology note from Escape.tech. Minor difference — both are factually sound.",
+      "evidence_a": ["\"(Escape.tech scanned real apps in production)\" — adds sourcing context"],
+      "evidence_b": ["Removed parenthetical, slightly less sourcing context"]
+    },
+    {
+      "dimension": "Persuasiveness (0.10)",
+      "winner": "B",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.55,
+      "reason": "B's consequence line adds marginal persuasive power. Both are already strong.",
+      "evidence_a": ["Strong persuasion throughout"],
+      "evidence_b": ["\"Within a week, someone found the key.\" — makes the threat tangible"]
+    },
+    {
+      "dimension": "CTA Strength (0.12)",
+      "winner": "Tie",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.60,
+      "reason": "CTA section unchanged. Both have excellent CTA flow.",
+      "evidence_a": ["'Real Question' → kolega.dev pipeline"],
+      "evidence_b": ["Same pipeline"]
+    },
+    {
+      "dimension": "Brand-Tone Consistency (0.12)",
+      "winner": "Tie",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.55,
+      "reason": "Both maintain consistent tone. B's 'regex-based tools' is slightly more precise language.",
+      "evidence_a": ["Consistent voice"],
+      "evidence_b": ["Same voice, marginally more precise terminology"]
+    }
+  ],
+  "overall_winner": "B",
+  "weighted_score_a": 47.8,
+  "weighted_score_b": 48.0,
+  "key_improvements_for_next_iteration": [
+    "Approaching diminishing returns — scores are near ceiling on most dimensions",
+    "Could consider adding a brief comparison table or visual element to break up text pattern",
+    "The 'semantic analysis' phrase still appears twice — could vary with 'deep code analysis' or similar",
+    "Consider whether the Escape.tech parenthetical should be restored for sourcing strength",
+    "The consequence line in the opening is good but 'Within a week' is somewhat arbitrary — could be more specific or removed"
+  ],
+  "judge_flags": ["possible_reward_hacking — marginal improvements suggest diminishing returns; candidate is being optimized for marginal judge gains rather than audience impact"]
+}

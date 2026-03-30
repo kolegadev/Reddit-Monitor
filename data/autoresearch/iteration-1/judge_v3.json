@@ -1,0 +1,99 @@
+{
+  "iteration": 3,
+  "candidate_a": "candidate_v2 (current best)",
+  "candidate_b": "candidate_v3",
+  "changelog_b": "Added 'The Real Question' section replacing 'The Fix' — frames kolega.dev as catching what existing tools miss vs generic 'add safety net'. Tightened numbers section with parenthetical source context. Removed 'blindfolded driving' metaphor. Shortened several paragraphs. Moved 'This is the most common pattern we see' line before numbers for better flow.",
+  "dimension_results": [
+    {
+      "dimension": "Audience Fit (0.18)",
+      "winner": "B",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.55,
+      "reason": "Both are tightly matched to the audience. B's 'The Real Question' section directly addresses the audience's likely state: they already have security tools. This is a slight edge.",
+      "evidence_a": ["\"'We already have Dependabot' isn't enough\" — good objection handling"],
+      "evidence_b": ["\"You're already using SAST. You already have Dependabot. You already do code review.\" — opens with audience's current state, making them feel understood"]
+    },
+    {
+      "dimension": "Clarity (0.14)",
+      "winner": "Tie",
+      "score_a": 4,
+      "score_b": 4,
+      "confidence": 0.60,
+      "reason": "Both are clear. B is slightly tighter in places but the changes are minor. Equivalent readability.",
+      "evidence_a": ["Clear throughout"],
+      "evidence_b": ["Numbers section with parenthetical context (e.g., 'Escape.tech scanned real apps in production') adds clarity on methodology"]
+    },
+    {
+      "dimension": "Structure/Flow (0.12)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 5,
+      "confidence": 0.75,
+      "reason": "B's 'The Real Question' section is a stronger closer than A's 'The Fix'. Instead of a generic 'add safety nets' conclusion, B reframes the entire problem: existing tools weren't designed for AI-generated code. This creates a narrative arc that pays off.",
+      "evidence_a": ["\"The Fix\" section is generic — 'add the safety net that the workflow strips away'"],
+      "evidence_b": ["\"The Real Question\" reframes the entire argument: tools designed for human mistakes can't catch AI mistakes — this is a satisfying conclusion to the piece"]
+    },
+    {
+      "dimension": "Novelty/Insight (0.12)",
+      "winner": "B",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.55,
+      "reason": "Both have the QA insight and Dependabot objection handling. B adds: 'Traditional tools assume a developer wrote the code and made human-style mistakes. AI-generated code fails in different ways.' — this is the most novel framing in either version.",
+      "evidence_a": ["Strong insights already present"],
+      "evidence_b": ["\"AI-generated code fails in different ways: it uses correct syntax to implement incorrect security logic, it introduces dependencies the developer didn't choose, and it creates patterns that look safe but aren't.\" — genuinely new framing of why existing tools fall short"]
+    },
+    {
+      "dimension": "Factual Caution (0.10)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 4,
+      "confidence": 0.55,
+      "reason": "B adds parenthetical context to sources ('Escape.tech scanned real apps in production') which strengthens sourcing slightly. Both are factually sound.",
+      "evidence_a": ["All claims sourced"],
+      "evidence_b": ["Parentheticals like '(Escape.tech scanned real apps in production)' add context without being verbose"]
+    },
+    {
+      "dimension": "Persuasiveness (0.10)",
+      "winner": "B",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.55,
+      "reason": "Both are highly persuasive. B's closing argument is slightly stronger — 'tools designed for human mistakes can't catch AI mistakes' is a hard-to-disagree framing.",
+      "evidence_a": ["\"Not sophisticated attacks, not zero-days — just copied credentials.\" — strong"],
+      "evidence_b": ["\"Traditional tools assume a developer wrote the code and made human-style mistakes.\" — sets up kolega.dev as necessary, not optional"]
+    },
+    {
+      "dimension": "CTA Strength (0.12)",
+      "winner": "B",
+      "score_a": 4,
+      "score_b": 5,
+      "confidence": 0.75,
+      "reason": "B's CTA section sets up the problem (existing tools aren't enough) and then delivers the solution (kolega.dev). The CTA feels like the logical answer to 'The Real Question' rather than a pitch. This is the 'natural next step' the rubric asks for.",
+      "evidence_a": ["\"Kolega.dev was built for exactly this.\" — fine but slightly disconnected from the preceding argument"],
+      "evidence_b": ["The 'Real Question' → 'tools weren't designed for this' → 'Kolega.dev was built to catch what those tools miss' pipeline makes the CTA feel inevitable"]
+    },
+    {
+      "dimension": "Brand-Tone Consistency (0.12)",
+      "winner": "Tie",
+      "score_a": 5,
+      "score_b": 5,
+      "confidence": 0.60,
+      "reason": "Both maintain the direct, data-driven, no-nonsense kolega.dev tone throughout. B removed the 'blindfolded driving' metaphor which was slightly off-brand (too common).",
+      "evidence_a": ["Consistent direct voice"],
+      "evidence_b": ["Same voice, cleaner ending without cliché metaphor"]
+    }
+  ],
+  "overall_winner": "B",
+  "weighted_score_a": 45.6,
+  "weighted_score_b": 47.8,
+  "key_improvements_for_next_iteration": [
+    "The blog is approaching strong scores across all dimensions — focus on polish rather than structural changes",
+    "Opening scenario could include a second sentence about consequences (data breach, customer impact) to raise stakes further",
+    "Pattern sections are slightly repetitive in structure — consider varying length or format",
+    "The 'semantic analysis' phrase appears 3 times — find alternatives or consolidate",
+    "Word count is solid (~1200 words) — don't add length, look for opportunities to cut"
+  ],
+  "judge_flags": []
+}
