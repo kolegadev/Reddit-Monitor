@@ -393,6 +393,18 @@ class BlogGenerator {
       console.log('DB save warning:', e.message);
     }
 
+    // Git commit + push
+    try {
+      const { execSync } = require('child_process');
+      const repoDir = path.join(__dirname, '..');
+      execSync(`git -C "${repoDir}" add data/blogs/${blog.slug}.md`, { stdio: 'pipe' });
+      execSync(`git -C "${repoDir}" commit -m "Add blog: ${blog.title}"`, { stdio: 'pipe' });
+      execSync(`git -C "${repoDir}" push`, { stdio: 'pipe', timeout: 30000 });
+      console.log(`Blog pushed to GitHub`);
+    } catch (e) {
+      console.log('Git push warning:', e.message);
+    }
+
     return true;
   }
 }
