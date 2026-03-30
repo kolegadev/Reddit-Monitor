@@ -1,0 +1,56 @@
+{
+  "answerTexts": [],
+  "testIdTexts": [],
+  "shadowTexts": [
+    {
+      "tag": "GUIDES-HEADER-PANEL",
+      "depth": 0,
+      "text": "         Back to Reddit Answers  what are the main security concerns with vibe coding                  New question    New question                      New question      "
+    },
+    {
+      "tag": "GUIDES-RESPONSE-CONTAINER-STREAMING",
+      "depth": 0,
+      "text": "   what are the main security concerns with vibe coding  \n      \n    \n    \n    \n  \n    \n    \n    \n  \n    \n    \n    \n  \n      Sources: r/cybersecurity, r/vibecoding, r/webdev +4 more\n      \n      \n    \n        Vibe coding, while efficient and innovative, comes with several security concerns that developers need to be aware of. Here are the main security issues highlighted by Redditors: Common Security Concerns in Vibe Coding   Exposed Environment Variables and API Keys    Risk: Hardcoding sensiti"
+    },
+    {
+      "tag": "GUIDES-SUBREDDIT-CARD",
+      "depth": 1,
+      "text": "          vibecoding  449K weekly visitors      fully give in to the vibes. forget that the code even exists.     "
+    },
+    {
+      "tag": "GUIDES-SUBREDDIT-CARD",
+      "depth": 1,
+      "text": "            vibecodeprod  31 weekly visitors      Vibe coding for large applications in production    "
+    },
+    {
+      "tag": "GUIDES-SUBREDDIT-CARD",
+      "depth": 1,
+      "text": "          VibeCodersNest  20K weekly visitors      Here we worship no-code, AI magic, and the fine art of pretending we \"program\" by dragging blocks around. Remember: if it compiles, it’s coding. If it doesn’t… also coding    "
+    },
+    {
+      "tag": "GUIDES-SUBREDDIT-CARD",
+      "depth": 1,
+      "text": "            websecurity  1.9K weekly visitors      Links and discussion on the development and maintenance of secure websites, for website owners, developers and pentesters. As applications and services move to the web, avoiding web vulnerabilities such as XSS and CSRF becomes critical.    "
+    },
+    {
+      "tag": "GUIDES-SUBREDDIT-CARD",
+      "depth": 1,
+      "text": "          cybersecurity  510K weekly visitors      This subreddit is for discussing cybersecurity topics, research, and emergent threats/findings.    "
+    },
+    {
+      "tag": "GUIDES-SUBREDDIT-CARD",
+      "depth": 1,
+      "text": "          webdev  666K weekly visitors      A community dedicated to all things web development: both front-end and back-end. For more design-related questions, try /r/web_design.    "
+    },
+    {
+      "tag": "GUIDES-RESPONSE-CONTAINER-REACTION-PANEL",
+      "depth": 1,
+      "text": "   Is this answer helpful?         Helpful           Unhelpful          Why was this unhelpful?           Select all that apply:     Outdated      Off-topic      Redundant      Lacking Detail      If you think a piece of content that generated this answer may be in violation of Reddit Rules, report the individual post or comment.    Submit    "
+    },
+    {
+      "tag": "LEFT-NAV-TOP-SECTION",
+      "depth": 0,
+      "text": "               Home                         Popular                         News                          Explore                "
+    }
+  ]
+}

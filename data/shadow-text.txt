@@ -1,0 +1,8 @@
+what are the main security concerns with vibe coding
+are AI-generated from redditors’ posts and comments and may not be accurate.
+fully give in to the vibes. forget that the code even exists.
+Vibe coding for large applications in production
+Here we worship no-code, AI magic, and the fine art of pretending we "program" by dragging blocks around. Remember: if it compiles, it’s coding. If it doesn’t… also coding
+Links and discussion on the development and maintenance of secure websites, for website owners, developers and pentesters. As applications and services move to the web, avoiding web vulnerabilities such as XSS and CSRF becomes critical.
+This subreddit is for discussing cybersecurity topics, research, and emergent threats/findings.
+A community dedicated to all things web development: both front-end and back-end. For more design-related questions, try /r/web_design.
