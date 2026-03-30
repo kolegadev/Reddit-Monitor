@@ -1,0 +1,44 @@
+{
+  "queries": [
+    "Is AI generated code secure?",
+    "Can AI write safe code?",
+    "AI coding assistant security risks",
+    "ChatGPT code vulnerabilities"
+  ],
+  "subreddits": [
+    "programming",
+    "webdev",
+    " cybersecurity",
+    "netsec",
+    "AskProgramming",
+    "learnprogramming"
+  ],
+  "schedule": {
+    "query": "0 10 * * *",
+    "blog": "30 10 * * *",
+    "video": "0 11 * * 0",
+    "post": "30 11 * * 0"
+  },
+  "reddit": {
+    "searchUrl": "https://www.reddit.com/search/?q=",
+    "askUrl": "https://www.reddit.com"
+  },
+  "ngrok": {
+    "localPort": 9222,
+    "remoteUrl": "CHANGEME" // e.g. tcp://0.tcp.ngrok.io:12345
+  },
+  "blog": {
+    "siteUrl": "https://kolega.dev",
+    "outputDir": "data/blogs",
+    "tone": "informative, technical but accessible"
+  },
+  "video": {
+    "outputDir": "data/videos",
+    "style": "headless",
+    "durationMinutes": 5
+  },
+  "post": {
+    "outputDir": "data/posts",
+    "maxPerDay": 2
+  }
+}

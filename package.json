@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "better-sqlite3": "^11.0.0"
+  },
+  "scripts": {
+    "query": "node src/run.js --mode query",
+    "blog": "node src/run.js --mode blog",
+    "video": "node src/run.js --mode video",
+    "post": "node src/run.js --mode post",
+    "all": "node src/run.js --mode all",
+    "db:init": "node src/db.js --init",
+    "db:stats": "node src/db.js --stats"
+  }
+}
