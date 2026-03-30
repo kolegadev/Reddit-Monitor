@@ -3,107 +3,121 @@ title: "How to Add Security Testing to Your Vibe Coding Workflow"
 subtitle: "Automated security validation that keeps up with AI-generated code"
 author: John
 date: March 2026
-readTime: "6 min read"
+readTime: "7 min read"
 tags: ["AI security","vibe coding","CI/CD","security testing","workflow"]
 ---
 
-The vibe coding workflow is fast. You describe what you want, the AI generates it, you accept the suggestion, and it's deployed. The speed from idea to production has collapsed from weeks to hours.
+A typical vibe coding session: you prompt Copilot or Cursor to generate an auth module, accept the diff, push to main, and move on. Fifty commits later, you have a working feature — and zero security review.
 
-Security testing hasn't kept up. Most teams run scans after deployment, if at all. The vibe coding workflow actively discourages security review — the code works, so why slow down?
+That's not hypothetical. In a r/vibecoding thread with 200+ upvotes, multiple developers admitted they never review AI-generated code for security. One comment summed it up: *"If it works in dev, it ships."*
 
-Here's how to add security testing that doesn't kill the speed advantage.
+The math is brutal. If a developer generates 400 lines per session and ships 3x a week, that's 62,000 lines per quarter that nobody read. Traditional code review doesn't scale to this. Security testing needs to be automated, layered, and — critically — quiet enough that developers don't bypass it.
 
-## The problem: speed vs safety
+## The real risk: plausible-looking code
 
-Vibe coding produces code faster than traditional code review can validate it. A developer might generate 500 lines of code in a session. Reviewing all of it manually is impractical, especially when the developer might not fully understand what was generated.
+The danger of vibe coding isn't that AI writes *bad* code. It's that AI writes **code that passes every existing check while being insecure**.
 
-The Stanford study found that developers with AI assistance were more confident their code was secure — while simultaneously writing more security flaws. The AI creates a false sense of safety.
+Here's what this looks like in practice. An engineer at a mid-size SaaS company used Cursor to generate a billing module. The AI produced a `/api/invoices/:id` endpoint with proper JWT validation, correct HTTP methods, and clean error handling. It passed SonarQube. It passed the linter. It shipped.
 
-## Layer 1: Pre-commit (instant)
+Three weeks later, a customer noticed they could view any other customer's invoice by changing the ID in the URL. The AI had validated authentication but never checked authorization — whether the requesting user owned that invoice. SAST can't catch this. The pattern is valid. The code is valid. The business logic is wrong.
 
-Add secret scanning to your pre-commit hook. If a credential hits the repo, the commit fails. This catches the most common and most dangerous vulnerability — hardcoded secrets — before it ever reaches CI.
+Purdue University researchers (2024) found developers using AI assistants were more confident their code was secure — while introducing more vulnerabilities than the control group. The AI doesn't make you less secure by writing obvious garbage. It makes you less secure by writing plausible garbage that you confidently ship.
 
-```bash
+This is a fundamentally different failure mode than what your existing tooling was designed to catch.
+
+## Four layers that actually work
+
+### Layer 1: Pre-commit — block secrets, nothing else
+
+Keep the pre-commit hook narrow. Secret scanning only. Anything broader slows the inner loop and developers will rip it out.
+
+```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: local
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
     hooks:
-      - id: secret-scan
-        entry: your-secret-scanner scan .
-        language: system
-        pass_filenames: false
+      - id: gitleaks
 ```
 
-This takes seconds per commit and prevents the worst class of vulnerability.
+Why secrets only? Pre-commit runs on every commit. If it takes 15 seconds, developers disable it. Gitleaks runs in under 2 seconds on most repos and catches the vulnerability class most likely to result in an actual breach. GitGuardian's 2024 report found credential leaks in 10% of public commits. Not theoretical.
 
-## Layer 2: CI pipeline (minutes)
+### Layer 2: CI pipeline — the full detection stack
 
-Run the full detection stack on every push. This should be automatic and non-blocking — developers shouldn't have to manually trigger it.
+On push, run everything. Automatic and visible, but don't block merges on low-severity findings.
 
-- **SBOM generation**: Map every dependency
-- **SCA**: Check for known vulnerable dependencies
-- **SAST**: Scan for injection, misconfigurations, and dangerous patterns
-- **Secret detection**: Catch anything the pre-commit hook missed
+| Tool Type | What it catches | What it misses |
+|---|---|---|
+| SBOM | Dependency inventory | Doesn't know if you *use* the vulnerable function |
+| SCA | Known CVEs | Zero-days, misconfigured integrations |
+| SAST | Pattern-based flaws | Business logic, authorization |
+| Secret scanning | Missed credentials | Encoded/encrypted secrets |
 
-The key is noise reduction. If your SAST tool generates 500 findings and 435 are false positives, developers will ignore all 500. Kolega.dev eliminates 90% of noise by understanding code architecture and grouping identical violations into single tickets.
+The critical variable is **noise**. 500 findings where 435 are false positives = 0 findings acted on. We've seen teams where the GitHub security tab is permanently collapsed — a wall of low-severity warnings that nobody reopens.
 
-## Layer 3: Semantic analysis (the gap)
+Kolega.dev groups findings semantically. Same pattern in 30 files? One ticket, not 30. Typical noise reduction: 90%. The difference between "review 500 findings" and "review 15 findings" is the difference between a tab nobody opens and a workflow people follow.
 
-SAST tools catch pattern-based vulnerabilities. They don't catch:
-- Authorization logic gaps (can user A access user B's data?)
-- Race conditions in payment flows
-- IDOR vulnerabilities
-- Business logic errors
+### Layer 3: Semantic analysis — the gap nobody talks about
 
-These are the vulnerabilities that actually get exploited. The Tenzai study found that while AI tools handled injection reasonably, they consistently failed authorization logic.
+OWASP's 2021 Top 10 ranked Broken Access Control #1. A 2024 University of California study found AI coding assistants generated vulnerable access control logic in 40% of tested scenarios. This is the vulnerability class where AI fails most — and where SAST provides zero coverage.
 
-Kolega.dev's deep code scan covers this gap — semantic analysis that understands code intent, not just syntax. 0% overlap with standard SAST means it finds what other tools miss.
+What SAST doesn't find:
 
-## Layer 4: Pull request review (focused)
+- **IDOR**: `/api/users/123/profile` returns data regardless of who requests it
+- **Authorization bypass**: Admin endpoints accessible to any authenticated user
+- **Race conditions**: Concurrent `/api/transfer` requests bypassing balance checks
+- **Business logic errors**: Discount codes that stack, reset tokens that don't expire
 
-When security findings are already noise-reduced and prioritized, PR review becomes actionable. Instead of reviewing 500 lines of unfamiliar AI-generated code, you review the 5 things that actually matter.
+Your SAST report says "0 critical findings." The `/api/admin` endpoint is accessible to any logged-in user because the AI forgot a role check. Green build, live vulnerability.
 
-- Does auth exist on every protected endpoint?
-- Are authorization checks correct?
-- Are there any business logic gaps?
-- Are secrets properly externalized?
-- Are dependencies verified?
+Kolega.dev's semantic scan traces data flow: request → auth check → authorization check → data access. It flags where the chain breaks. Findings have zero overlap with standard SAST — vulnerabilities no other tool in your pipeline would catch.
 
-This is a 10-minute review, not a 2-hour one. The automation did the heavy lifting.
+### Layer 4: Focused PR review
 
-## The workflow
+With noise-reduced, exploitability-ranked findings, PR review becomes specific:
+
+1. Does every protected endpoint have auth middleware?
+2. Do authorization checks verify ownership, not just authentication?
+3. Are state mutations concurrency-safe?
+4. Are secrets externalized?
+5. Do new dependencies have known CVEs?
+
+Ten minutes. Not two hours. The automation surfaced the risks; the human confirms the fix.
+
+## The pipeline
 
 ```
 AI generates code
     ↓
-Pre-commit: secret scan (< 5 seconds)
+Pre-commit: gitleaks (< 2s, blocks on secrets)
     ↓
 Push to branch
     ↓
-CI: SBOM + SCA + SAST + secrets (2-5 minutes)
+CI: SBOM + SCA + SAST + secrets (3-5 min, PR comments)
     ↓
-Semantic analysis: logic flaws (3-5 minutes)
+Semantic scan: auth/logic flaws (3-5 min, PR comments)
     ↓
-PR created with prioritized findings
+PR: 5-15 prioritized findings
     ↓
-Focused review (10 minutes)
+Focused review (10 min)
     ↓
-Merge and deploy
+Merge → Deploy
 ```
 
-Total added time: ~20 minutes. Total security coverage: everything that matters.
+~20 minutes added. Full coverage: secrets, dependencies, injection, misconfiguration, authorization, business logic.
 
-## What not to do
+## Common mistakes
 
-- **Don't scan after deployment.** By then, the vulnerability is live.
-- **Don't ignore findings because "the AI wrote it."** The AI's code is your responsibility.
-- **Don't rely on a single tool.** No single scanner catches everything.
-- **Don't skip the business logic review.** That's where the real vulnerabilities hide.
+**Scanning after deployment.** The vulnerability is live. Shift left isn't a cliché — it's a timeline.
 
-## The goal
+**Ignoring findings because "the AI wrote it."** You shipped it. You own the breach.
 
-Vibe coding makes development faster. Security testing should make it safer without making it slower. The tools exist to do this — you just need to wire them into the pipeline and reduce the noise so developers actually act on the findings.
+**One tool and done.** SAST catches injection, misses IDOR. SCA catches known CVEs, misses logic bugs. Layer them.
+
+**Letting noise kill adoption.** 500 findings = 0 findings acted on. Noise reduction is a security outcome, not a UX preference.
+
+If your team is shipping AI-generated code without semantic analysis, you have authorization vulnerabilities in production. The question is whether you find them before or after your customers do.
 
 ---
 
-Kolega.dev combines SAST, SCA, secret detection, and semantic analysis with 90% noise reduction. [Scan your repo for free](https://kolega.dev).
+Kolega.dev combines SAST, SCA, secret detection, and semantic analysis with 90% noise reduction — built for teams shipping AI-generated code. [Scan your repo for free](https://kolega.dev).

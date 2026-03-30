@@ -7,60 +7,96 @@ readTime: "7 min read"
 tags: ["AI security","vibe coding","vulnerabilities","SAST","application security"]
 ---
 
-45% of AI-generated code fails security tests. That's not a controversial opinion — it's a Veracode number from testing 100+ LLMs across 80 coding tasks. The security performance doesn't improve with model size either. Bigger isn't safer.
+45% of AI-generated code fails security tests. That's a Veracode number from testing 100+ LLMs across 80 coding tasks. Security performance doesn't improve with model size. Bigger isn't safer.
 
-The question isn't whether AI-generated code has vulnerabilities. It's which ones, and why they keep getting through.
+The question isn't whether AI-generated code has vulnerabilities. It's which ones, and why your CI pipeline keeps letting them through.
 
 ## 1. Hardcoded Secrets
 
-The fastest vulnerability to exploit. Invicti Security Labs generated 20,000 web apps with popular LLMs — 1,182 used "supersecretkey" as the JWT secret. LLMs have a set of favourite default values that they reuse constantly: "supersecretkey", "admin@example.com:password", "user@example.com:password123".
+The fastest vulnerability to exploit. Invicti Security Labs generated 20,000 web apps with popular LLMs — 1,182 used `"supersecretkey"` as the JWT secret. LLMs have a set of favourite default values they reuse: `"supersecretkey"`, `"admin@example.com:password"`, `"user@example.com:password123"`.
 
-They also mix up Supabase anon keys (safe with RLS enabled) and service_role keys (skip all security). This is how Lovable's CVE-2025-48757 happened — 303 endpoints with no row-level security across 170 projects.
+They also mix up Supabase anon keys (safe with RLS enabled) and `service_role` keys (skip all security). This is how Lovable's CVE-2025-48757 happened — 303 endpoints with no row-level security across 170 projects. The AI generated the code. The default was insecure. Nobody checked.
+
+**Check for:** Literal secret strings, hardcoded API keys in committed code, anon/service_role key confusion in Supabase/Firebase configs.
 
 ## 2. Injection (SQL, XSS, Command)
 
-CodeRabbit found that AI-written code is 2.74x more likely to contain XSS vulnerabilities than human-written code. The issue isn't complexity — it's that LLMs train on GitHub, where string-concatenated SQL queries are still common in tutorials and examples.
+CodeRabbit found AI-written code is 2.74× more likely to contain XSS vulnerabilities than human-written code. The problem isn't complexity — it's training data. LLMs trained on GitHub, where string-concatenated SQL queries and `innerHTML` assignments are still common in tutorials and Stack Overflow answers.
 
-Client-side validation exists. Server-side validation doesn't. You can bypass the form and send anything to the API directly.
+```python
+# What the AI writes — looks fine, isn't
+cursor.execute(f"SELECT * FROM users WHERE email = '{email}'")
+```
+
+One quote mark in the email field and you own the database. The AI generates the happy path. Attackers don't use the happy path.
+
+**Check for:** String concatenation in queries, missing parameterized statements, `innerHTML` or `dangerouslySetInnerHTML`, unsanitized user input reaching database calls.
 
 ## 3. Authentication Theatre
 
-Professional login forms. Password strength indicators. "Remember me" checkboxes. Looks great. Behind the scenes: no server-side auth, no session validation, no role-based access control.
+Professional login forms. Password strength indicators. "Remember me" checkboxes. Looks production-ready. Behind the scenes: no server-side session validation, no token expiry, no role-based access control.
 
-Lovable's platform-wide failure wasn't a bug — it was the default output. Supabase turns off Row Level Security by default, and the AI didn't turn it on.
+Lovable's platform-wide failure wasn't a bug — it was the default output. Supabase ships with Row Level Security disabled by default. The AI generated working auth *code* but didn't enable the auth *infrastructure*. Your users have passwords. Your database doesn't care.
+
+```javascript
+// AI generates this. It works. It's not secure.
+const user = await supabase.from('users').select('*').eq('id', userId)
+// No RLS policy = any user can read any other user's data
+```
+
+**Check for:** Session/token validation on every protected endpoint, role checks on data access, RBAC enforcement — not just existence.
 
 ## 4. Supply Chain Blindness
 
-19.7% of AI-suggested packages don't exist. Of those, 58% are hallucinated names that appear consistently across multiple models. Attackers have noticed — one researcher uploaded an empty package called "huggingface-cli" (a common hallucination) and got 30,000 downloads in three months.
+19.7% of AI-suggested packages don't exist (Escape.tech, 2025). Of those, 58% are hallucinated names that appear consistently across multiple models. Attackers have noticed — one researcher uploaded an empty package called `huggingface-cli` (a common hallucination) and got 30,000 downloads in three months.
 
-Your AI-generated codebase is pulling in dependencies you didn't choose, from sources you didn't vet.
+Your AI-generated codebase is pulling in dependencies you didn't choose, from sources you didn't vet. `package-lock.json` is a lie if the packages were hallucinated.
+
+**Check for:** Every `import` and `require` — does the package exist on the registry? When was it last published? Who published it?
 
 ## 5. Missing Security Headers
 
-Content-Security-Policy, X-Frame-Options, Strict-Transport-Security, X-Content-Type-Options — these headers are missing from the majority of AI-generated web applications. Misconfigured CORS policies allow all origins.
+Content-Security-Policy, X-Frame-Options, Strict-Transport-Security, X-Content-Type-Options — missing from most AI-generated web apps. CORS policies default to `*`. The AI writes functional route handlers. Security headers are middleware configuration. LLMs generate one but not the other.
+
+Here's why this matters beyond the checkbox: without Content-Security-Policy, any XSS vulnerability (see #2) becomes a full remote code execution vector. The headers aren't redundant security — they're the last line of defence that turns a vulnerability into an annoyance instead of a compromise.
+
+Run your AI-generated app through [securityheaders.com](https://securityheaders.com). The result will probably rhyme with "F."
+
+**Check for:** CSP headers on every response, CORS restricted to actual origins, HSTS enabled, X-Content-Type-Options: nosniff.
 
 ## 6. Error Handling That Leaks
 
-Verbose error messages, stack traces in production, debugging output exposed to end users. The AI generates functional error handling — it just doesn't follow security best practices around information disclosure.
+The AI generates `try/catch` blocks that log the error and return a response. What they don't do: sanitize the response before sending it to the client. Database schema names, file paths, internal IP addresses — all in the 500 response.
+
+```json
+// What your API returns to anyone who triggers an error
+{"error": "relation 'users_private' does not exist at /app/src/db.js:47"}
+```
+
+**Check for:** Generic error messages in production responses, no stack traces in client-facing output, structured error IDs for debugging instead of raw details.
 
 ## 7. Race Conditions and Logic Flaws
 
-Tenzai used 5 AI tools to build 15 copies of the same app and found 69 security holes. SQL injection and XSS were handled well. Authorization logic failed every time — negative cart amounts, prices manipulated, resources accessed without ownership checks.
+Tenzai used 5 AI tools to build 15 copies of the same app and found 69 security holes. SQL injection and XSS were handled reasonably well. Authorization logic failed every time — negative cart amounts, manipulated prices, resources accessed without ownership checks.
 
-Pattern matching can't find these. You need to understand what the code is supposed to do.
+SAST tools look for dangerous functions. These bugs are *missing* functions. No `checkOwnership()` call where one should be. No price floor validation. No quantity cap. Pattern matching can't find something that isn't there.
 
-## 8. No Input Validation on the Server
+The uncomfortable truth: the vulnerabilities your team is most likely to miss are the ones your tools are least likely to catch. AI-generated code maximizes both sides of that gap.
 
-Client-side forms validate everything. Server-side endpoints validate nothing. File uploads accepted without type checking, data constraints not enforced, business logic not validated.
+**Check for:** Business logic validation independent of UI constraints, ownership checks on every resource mutation, atomic operations on financial/quantity fields.
 
-## Why scanners miss these
+## 8. No Server-Side Input Validation
 
-Traditional SAST tools look for patterns. These vulnerabilities aren't pattern problems — they're architecture problems. The code looks syntactically correct. The functions exist. The endpoints respond. But the security logic is incomplete or absent.
+Client-side forms validate everything. Server-side endpoints validate nothing. File uploads accepted without type or size checking, data constraints not enforced at the database or API layer, business rules only enforced in JavaScript.
 
-Kolega.dev's deep code scan was built for exactly this gap — semantic analysis that understands code intent, not just syntax. 0% overlap with standard SAST means it catches the vulnerabilities that other tools systematically miss.
+Disable JavaScript in your browser and submit the form. If the server accepts it, you have a bug. That's a 10-second test you can run right now.
 
----
+**Check for:** Server-side validation that mirrors or exceeds client-side checks, file type verification by content (not just extension), database constraints as a safety net.
 
-The vulnerabilities aren't surprising. What's surprising is how many teams ship AI-generated code without any of these checks. The tools exist. The question is whether you're running them on the code your AI is writing.
+## What to do about it
 
-[Scan your repo for free](https://kolega.dev) and see what's hiding in your AI-generated code.
+You just read eight vulnerability categories. Your SAST tool probably catches one or two of them. The rest require human review, architectural decisions, or tools built for a different class of problem.
+
+[Kolega.dev](https://kolega.dev) does semantic analysis — it understands what the code is *supposed* to do and checks whether it actually does it. In benchmarking against standard SAST tools, there's 0% overlap in findings. It catches hardcoded secrets, missing auth, hallucinated packages, absent validation — the bugs that pattern matching systematically misses.
+
+Which of these eight are in your codebase right now? [Find out in 60 seconds](https://kolega.dev).

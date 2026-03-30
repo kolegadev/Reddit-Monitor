@@ -3,65 +3,91 @@ title: "How to Audit Vibe-Coded Applications for Security"
 subtitle: "A practical audit framework for code you didn't write — and might not understand"
 author: John
 date: March 2026
-readTime: "9 min read"
+readTime: "10 min read"
 tags: ["AI security","vibe coding","security audit","code review","application security"]
 ---
 
-Auditing code you wrote is hard. Auditing code an AI wrote — code you might not fully understand — is a different problem entirely. But that's the reality of vibe coding. Developers are shipping applications built from AI-generated output, and somebody needs to verify it's safe.
+Your team shipped a feature in two hours. Nobody wrote the code — they prompted for it, iterated on the output, and merged it. It works. But does anyone know what it actually does?
 
-This came up repeatedly across r/vibecoding and r/cybersecurity. The question isn't whether you should audit vibe-coded applications. It's how.
+That's the vibe coding security problem. Across r/vibecoding and r/cybersecurity, the same concern keeps surfacing: AI-generated code looks correct, passes review, and ships — but the people approving it often don't understand the dependencies, data flows, or failure modes.
 
-## Start with what you can automate
+Here's how to audit it.
 
-Don't read the code line by line yet. Start with automated scanning — not because it catches everything, but because it catches the obvious things fast and frees you to focus on what requires human judgment.
+## Phase 1: Automated scanning (30 minutes)
 
-**Step 1: Dependency audit.** Generate a full SBOM. Verify every package exists. Check CVEs. The 19.7% of AI-suggested packages that don't exist are the easiest vulnerability to find and fix — just delete them.
+Don't read code yet. Run automated tools first — they catch the vulnerabilities that exist regardless of authorship, and they're critical for vibe-coded apps because the developer may not have caught them either.
 
-**Step 2: Secret scan.** Run credential detection across the entire repo. Hardcoded API keys, tokens, and passwords are the most common and most dangerous vulnerability in AI-generated code. This is a 30-second check that prevents the worst kind of breach.
+**1. Dependency verification.** Generate an SBOM (`syft`, `cyclonedx`). Verify every package exists. LLMs hallucinate package names — `python-request` instead of `requests`, or entirely fictional libraries. A hallucinated dependency creates a silent runtime failure or, worse, a dependency confusion attack if someone publishes a malicious package with that name. CVE-scan the verified list.
 
-**Step 3: SAST scan.** Run static analysis for injection vulnerabilities, insecure configurations, and known dangerous patterns. But — and this is critical — use a scanner with noise reduction. If 87% of your findings are false positives, you'll learn to ignore all of them, including the real ones. Kolega.dev groups identical violations into single tickets and eliminates false positives by understanding your code architecture.
+**2. Secret detection.** Run `gitleaks` or `trufflehog` against the full repo. Check API keys, database credentials, JWT secrets, cloud tokens. LLMs trained on public code sometimes reproduce real credentials from their training data. Scan `.env.example`, Dockerfiles, and CI/CD configs too.
 
-## Then audit what automation can't reach
+**3. SAST.** Run Semgrep or Trivy for injection (SQL, command, LDAP), insecure deserialization, path traversal. The catch: SAST tools produce high false-positive rates on AI-generated code because they flag suspicious patterns without architectural context. When your team dismisses most findings as noise, real vulnerabilities get dismissed too. Kolega.dev solves this by understanding your code's architecture and grouping identical violations into single tickets — turning a flood of alerts into a prioritized fix list.
 
-Automated tools catch pattern-based vulnerabilities. They don't catch business logic flaws, authorization gaps, or race conditions. For those, you need to understand what the code is supposed to do.
+## Phase 2: Manual review (2-4 hours)
 
-**Step 4: Map the data flows.** For each feature, trace how data enters the system, where it's processed, and where it's stored. The AI generated the code — but you defined the requirements. Verify that the implementation matches the intent.
+**4. Trace data flows.** Pick the most sensitive data in your app — PII, payment info, auth tokens. Trace it: input → processing → storage. Is it logged anywhere? Included in error responses? Passed to third-party APIs? For vibe-coded apps, check intermediate steps specifically. The LLM might store raw input in a session, log it for debugging, and forward it to an external service — three exposures the prompter never considered.
 
-**Step 5: Test auth independently.** Don't trust the login form. Open a separate terminal or Postman and hit every API endpoint directly, without the frontend. If an endpoint responds without authentication, the AI skipped server-side auth. This is the most common gap — security theatre on the client side, nothing on the server.
+**5. Bypass the UI and test the API directly.** The single most important manual check. Use `curl` or Postman to hit every endpoint without the frontend. LLMs routinely implement auth on the client (a login form checking locally) while leaving the API wide open. r/cybersecurity threads document this pattern repeatedly.
 
-**Step 6: Check authorization logic.** Can user A access user B's data? Can a regular user perform admin actions? Can cart quantities go negative? Can prices be manipulated? These are logic flaws that no pattern matcher will find.
+Then test for IDOR: authenticate as one user, change the user ID in the request, and check if you can access another user's resources. LLMs implement "get resource by ID" without adding "verify the requester owns this resource" — making IDOR endemic in vibe-coded apps.
 
-## The audit checklist
+**6. Test authorization at boundaries.** Create accounts with different roles. Hit admin endpoints as a regular user. Access other users' data. Enumerate IDs sequentially. Test edge-case inputs: negative quantities, 10MB JSON payloads, deeply nested objects. Authorization requires business logic that the LLM doesn't have — this is where vibe-coded apps fail most often.
 
-For each vibe-coded feature or application:
+## Phase 3: Configuration
 
-- [ ] **Dependencies**: SBOM generated, all packages verified, CVE scan clean
-- [ ] **Secrets**: No hardcoded keys, tokens, or credentials in source code
-- [ ] **Injection**: SAST scan clean for SQL injection, XSS, command injection
-- [ ] **Auth**: Every protected endpoint verified via direct API call
-- [ ] **Authorization**: Business logic tested for access control violations
-- [ ] **Headers**: Security headers present on all responses
-- [ ] **CORS**: Locked to specific origins, no wildcards
-- [ ] **Error handling**: No stack traces or sensitive information in error responses
-- [ ] **Input validation**: Server-side validation on all user inputs
-- [ ] **File uploads**: Type checking, size limits, path traversal prevention
+**7. Security headers.** Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Strict-Transport-Security, Referrer-Policy. AI-generated web apps routinely omit these.
 
-## What makes vibe-coded audits different
+**8. CORS.** Verify explicit origins. Wildcard CORS with credentials enabled is a critical misconfiguration that LLMs ship by default.
 
-Traditional code audits assume the developer understood what they wrote. Vibe-coded audits can't make that assumption. The developer who hit "Accept All" on the AI's suggestion might not know why a particular library was chosen, what a specific function does, or whether an edge case is handled.
+**9. Error handling.** Trigger errors and check for stack traces, schema details, file paths, framework versions.
 
-This means the auditor needs to spend more time on dependency verification and authorization testing, and less time on style and syntax. The code might be clean and well-formatted — that doesn't mean it's secure.
+**10. Rate limiting.** Hammer your auth endpoint — 100 attempts in 10 seconds. If they all go through, there's no brute-force protection.
 
-## The tools that help
+## Audit checklist
 
-- **SBOM generation**: `syft`, `cyclonedx`, or Kolega.dev's dependency mapper
-- **Secret scanning**: `gitleaks`, `trufflehog`, or Kolega.dev's built-in detection
-- **SAST**: Semgrep, Trivy, or Kolega.dev's multi-engine Tier 1 detection
-- **Semantic analysis**: Kolega.dev's Deep Code Scan for logic flaws and authorization gaps
-- **Business logic**: Manual testing — no tool can fully automate this yet
+- [ ] SBOM generated, all packages verified to exist, CVE scan clean
+- [ ] No hardcoded secrets (source, `.env`, Docker, CI/CD)
+- [ ] SAST clean: injection, deserialization, path traversal
+- [ ] Sensitive data flows traced end-to-end
+- [ ] All API endpoints tested without frontend
+- [ ] IDOR tested across user boundaries
+- [ ] Security headers present (CSP, X-Frame-Options, HSTS)
+- [ ] CORS locked to explicit origins
+- [ ] Error responses sanitized
+- [ ] Rate limiting on auth endpoints
+- [ ] Server-side input validation on all user inputs
+- [ ] File uploads hardened (type check, size limit, path traversal)
 
-The goal isn't to review every line of code. It's to verify that the things that matter — auth, authorization, data handling, secrets — are implemented correctly. The rest is noise.
+## Why vibe-coded audits differ
+
+1. **Visual inspection is unreliable.** The code is clean, well-commented, syntactically valid. But comments describe what the LLM *intended*, not what it implemented. You must test behavior, not read prose.
+
+2. **The dependency chain is unknown.** The developer who accepted the AI's suggestions can't explain why a library was chosen, whether it's maintained, or if it even exists. Hallucinated packages compound this — you may be depending on software that doesn't exist.
+
+3. **Authorization is the blind spot.** LLMs handle authentication (who are you?) adequately — it follows clear patterns. Authorization (what can you do?) requires understanding business rules they don't have. Result: apps where login works perfectly, but any authenticated user can access any resource.
+
+## The real cost of skipping this
+
+Here's what happens when vibe-coded code ships unaudited, based on what developers report:
+
+- A Next.js app with a working login page and no server-side auth middleware — anyone could hit `/api/users` and get every user's email.
+- A Python service importing `python-request` (hallucinated) that silently failed at deploy time, masking a broken feature.
+- A payment handler that validated amounts on the client but accepted negative values from the API — users checking out with -$50 credits.
+
+Each of these passed code review because the code *looked* right. None would have survived this 12-step audit.
+
+## Tools
+
+| Category | Open source | Kolega.dev |
+|---|---|---|
+| SBOM | `syft`, `cyclonedx` | ✅ Dependency mapper |
+| Secrets | `gitleaks`, `trufflehog` | ✅ Built-in detection |
+| SAST | Semgrep, Trivy | ✅ Multi-engine Tier 1 |
+| Semantic analysis | — | ✅ Deep Code Scan |
+| Noise reduction | — | ✅ Architecture-aware grouping |
+
+Business logic and authorization testing remain manual. No tool fully automates "should this user be able to do this?"
 
 ---
 
-Kolega.dev combines all of these checks in one scan — dependency mapping, secret detection, SAST, and semantic analysis — with noise reduction so you only review what matters. [Scan your vibe-coded repo for free](https://kolega.dev).
+Kolega.dev runs all five scan categories in one pass with architecture-aware noise reduction, so you review what matters instead of drowning in false positives. [Scan your vibe-coded repo for free](https://kolega.dev).

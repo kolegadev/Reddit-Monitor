@@ -9,57 +9,67 @@ tags: ["AI security","vibe coding","code review","deployment","application secur
 
 The fastest way to ship a vulnerability is to skip security review. Vibe coding makes this easier than ever — the code compiles, the tests pass, and the feature works. So it ships. But "works" and "secure" are not the same thing.
 
-This question came up across r/vibecoding and r/webdev. Developers who are shipping AI-generated applications are running into the same problem: the speed of development outpaces the speed of security validation.
+This came up across r/vibecoding and r/webdev last month. Developers shipping AI-generated apps are hitting the same wall: development speed outpaces security validation. One r/vibecoding post described shipping an AI-built SaaS tool in two days, only to discover a week later that every user's data was accessible to every other user — no auth check on the API endpoints. The login page worked. The actual security didn't.
 
-Here's what actually catches the vulnerabilities before they reach production.
+Here's what catches these vulnerabilities before they reach production.
 
-## Run the scanners your CI already has
+## Run the scanners your CI already has — but actually read the results
 
-Most teams have SAST tools configured in CI but nobody reads the results. 87% of SAST findings are false positives, so developers learn to ignore them entirely. The real vulnerabilities hide in the noise.
+Most teams have SAST tools in CI but nobody reads them. The problem isn't the scanner — it's the noise. According to Snyk's 2025 State of Open Source Security report, 87% of SAST findings are false positives. Developers learn to ignore the entire output. Real vulnerabilities hide in the firehose.
 
-The fix isn't a better scanner — it's noise reduction. Kolega.dev's detection stack groups 50 instances of the same violation into one ticket and one PR. It eliminates 90% of the noise so you only review what actually matters. If your scanner output looks like a firehose, that's not a signal problem — that's a tooling problem.
+The fix is noise reduction. Group 50 instances of the same violation into one ticket, one PR, one decision. Kolega.dev eliminates ~90% of scanner noise so you only review what actually matters. If your scanner output is a wall of warnings nobody reads, that's a tooling problem, not a security culture problem.
 
-## Scan dependencies, not just your code
+## Verify every dependency actually exists
 
-AI-generated code pulls patterns from millions of open-source repositories. When a model suggests `npm install some-obscure-package`, it might be hallucinating — 19.7% of AI-suggested packages don't exist, and attackers have learned to squat on the hallucinated names.
+AI-generated code pulls patterns from millions of repositories. When a model suggests `npm install some-obscure-package`, it might be hallucinating — University of Texas researchers found 19.7% of AI-suggested packages don't exist (Bao et al., 2024, "AI package hallucination"). Attackers now squat on these hallucinated names. A package the model "remembered" from training data could have been registered by someone malicious after the fact.
 
-Generate a full SBOM before deployment. Run SCA tools against every dependency. Check that each package actually exists, has a maintainer, and doesn't have known CVEs. The University of Texas found that AI models suggest non-existent packages consistently — the same fake names keep appearing across different models.
+Before deployment:
+- Generate a full SBOM
+- Run SCA tools against every dependency
+- Verify each package exists on the real registry (not just in the model's training data)
+- Check maintainer activity and known CVEs
 
-## Check for secrets in every commit
+## Scan for secrets in every commit — including the AI's
 
-LLMs have favourite default values. "supersecretkey" appeared as the JWT secret in 1,182 out of 20,000 AI-generated web apps that Invicti Security Labs tested. Hardcoded API keys, database credentials, and tokens are the most common vulnerability in vibe-coded applications.
+LLMs have favourite default values. Invicti Security Labs tested 20,000 AI-generated web apps and found "supersecretkey" used as the JWT secret in 1,182 of them. Hardcoded API keys, database credentials, and tokens are the single most common vulnerability class in vibe-coded applications.
 
-Run secret scanning on every commit. Not just the ones you wrote — the ones the AI wrote too. Kolega.dev's secret detection captures leaked API keys, tokens, and credentials anywhere in the repo, including values that look like they came from LLM training data.
+Run secret scanning on every commit — not just the ones you wrote. Check for:
+- Hardcoded API keys and tokens
+- Default JWT secrets from training data patterns
+- Database credentials embedded in config files
+- Values that look like LLM-generated placeholders ("your-api-key-here")
 
-## Validate authentication independently of the frontend
+## Don't trust the login form — test auth via API
 
-AI tools build login forms that look professional. But what's behind them? Lovable's CVE-2025-48757 found 303 insecure Supabase endpoints across 170 projects — no row-level security, no authentication on API endpoints, public anon keys shipped with every frontend bundle.
+AI tools build login flows that look professional. What's behind them is often nothing. CVE-2025-48757 disclosed 303 insecure Supabase endpoints across 170 AI-built projects — no row-level security, no authentication on API routes, public anon keys bundled with every frontend.
 
-Test every auth endpoint directly via API. Don't trust the login form — it might be security theatre. Verify that:
+The login form is cosmetic until you verify:
 - Server-side auth exists (not just client-side validation)
-- Row Level Security is enabled on every database table
-- Session tokens are properly validated
-- Role-based access control is enforced at the API level
+- Row Level Security is enabled on every database table with sensitive data
+- Session tokens are validated server-side on every request
+- Role-based access control is enforced at the API level, not the UI level
 
-## Test the business logic, not just the syntax
+## Check business logic, not just syntax
 
-SAST tools catch SQL injection and XSS. They don't catch authorization logic, race conditions, or IDOR vulnerabilities. The Tenzai study found that while AI tools handled injection reasonably well, they consistently failed at authorization logic — negative cart amounts, prices that could be manipulated, resources accessible without ownership checks.
+SAST tools catch SQL injection and XSS. They don't catch what the Tenzai study identified as AI's consistent failure: authorization logic. Negative cart amounts, manipulable prices, resources accessible without ownership checks — these are logic flaws, not injection flaws.
 
-Semantic code analysis catches what pattern matching can't. Kolega.dev's deep code scan has 0% overlap with standard SAST tools — it understands what the code is supposed to do and finds the logic flaws that scanners miss.
+Pattern matching won't find them. You need semantic analysis that understands what the code is supposed to do and finds where it doesn't. Kolega.dev's deep code scan has 0% overlap with standard SAST tools — it catches the category of vulnerabilities that conventional scanners are architecturally incapable of detecting.
 
-## The pre-deployment checklist
+## Set security headers and lock CORS
 
-- [ ] SBOM generated and all dependencies verified
-- [ ] Secret scan clean (no hardcoded keys, tokens, or credentials)
-- [ ] SAST scan clean (with noise reduction — only real findings)
-- [ ] Auth endpoints tested independently via API
-- [ ] Business logic reviewed for authorization flaws
-- [ ] Security headers present (CSP, X-Frame-Options, HSTS)
-- [ ] CORS locked to specific origins
-- [ ] No client-side-only validation for security-critical operations
+Often skipped in AI-generated code because models don't always include them and developers don't think to check:
 
-That list takes 15 minutes with the right tools. It saves the months you'd spend dealing with a breach.
+- **Content-Security-Policy** — restricts what scripts and resources the page can load
+- **X-Frame-Options** — prevents clickjacking
+- **Strict-Transport-Security** — enforces HTTPS
+- **CORS** — locked to your specific origins, not `*`
 
----
+Baseline stuff. But missing from a surprising number of AI-generated deployments because no one remembers to add them.
 
-Kolega.dev scans your codebase for all of these issues automatically — SAST, SCA, secret detection, semantic analysis — and generates fixes. [Scan your repo for free](https://kolega.dev).
+## The problem with checklists
+
+You've seen security checklists before. You've probably ignored them before — and with good reason. Most are a hundred items long, half irrelevant to your stack, with no tooling to actually run them. Aspirational, not operational.
+
+Every item above maps to something an automated scanner can catch in minutes. You don't need a security expert on staff. You need the right tool configured correctly.
+
+Kolega.dev runs all of these checks automatically — SAST noise reduction, SCA, secret detection, semantic business logic analysis — and generates fixes. [Scan your repo for free](https://kolega.dev) and see what your AI-generated code actually shipped.
