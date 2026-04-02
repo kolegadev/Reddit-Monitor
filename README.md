@@ -5,7 +5,7 @@ Automated Reddit Q&A monitoring system for AI code security topics.
 ## Architecture
 
 ```
-┌─────────────┐    ngrok tunnel     ┌──────────────────┐
+┌─────────────┐    cloudflare tunnel ┌──────────────────┐
 │  Your local  │ ◄──────────────────► │  Reddit-Monitor  │
 │  Chrome/PC   │   (residential IP)  │  (VPS/OpenClaw)  │
 │  + CDP :9222 │                     │                  │
@@ -28,7 +28,7 @@ Automated Reddit Q&A monitoring system for AI code security topics.
 
 ## Setup
 
-### 1. Local Machine — Chrome CDP + ngrok
+### 1. Local Machine — Chrome CDP + cloudflare
 
 On your local machine (residential IP, not blocked by Reddit):
 
@@ -36,16 +36,16 @@ On your local machine (residential IP, not blocked by Reddit):
 # Launch Chrome with CDP
 google-chrome --remote-debugging-port=9222 --user-data-dir=~/.chrome-debug-profile --no-first-run &
 
-# Tunnel CDP port through ngrok
-ngrok tcp 9222
+# Tunnel CDP port through cloudflare
+cloudflare tcp 9222
 ```
 
-Note the ngrok TCP address (e.g. `0.tcp.ngrok.io:12345`).
+Note the cloudflare TCP address ?
 
 ### 2. VPS — Configure OpenClaw
 
 ```bash
-openclaw config set browser.cdpUrl "http://0.tcp.ngrok.io:12345"
+openclaw config set browser.cdpUrl "http://0.tcp.cloudflare.com:12345"
 ```
 
 Log into Reddit in the CDP Chrome instance (one-time).
@@ -104,4 +104,4 @@ node src/run.js --mode post
 - [ ] Video generator
 - [ ] Reddit advert poster
 - [ ] Cron job integration
-- [ ] ngrok tunnel setup guide
+- [ ] cloudflare tunnel setup guide
