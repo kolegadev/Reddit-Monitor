@@ -1,0 +1,36 @@
+# Machine-readable repository metadata
+# This file helps AI assistants and automation tools understand your project
+schema_version: "1.0"
+
+project:
+  name: "Reddit-Monitor"
+  type: "None"
+  status: "active"
+  maturity: "experimental"
+
+domains:
+
+technologies:
+
+languages:
+  - JavaScript
+  - Shell
+
+hardware:
+  gpu_vendors: []
+  compute_apis: []
+
+dependencies:
+  required: []
+  optional: []
+
+relationships:
+  depends_on: []
+  used_by: []
+  related: []
+
+ai_context:
+  summary: "Reddit monitoring tool"
+  use_cases: []
+  not_suitable_for: []
+  entry_points: []
